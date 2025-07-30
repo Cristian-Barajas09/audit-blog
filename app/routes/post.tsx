@@ -2,28 +2,13 @@ import matter from 'gray-matter';
 import fs from 'fs/promises'
 import type { Route } from "./+types/post";
 import { ContentArticle } from '~/blog/components/ContentArticle';
-import { getPosts } from '~/blog/services/posts';
+import { getPost } from '~/blog/services/posts';
 
 export async function loader({ params }: Route.LoaderArgs) {
 
     try {
-        const file = await fs.readFile(`posts/${params.postSlug}.md`, "utf-8")
-        const { data, content } = matter(file);
-        let otherPosts = await getPosts(null);
-
-        // Get a random post different from the current one
-        // Filter out the current post
-        const randomPosts = otherPosts.filter(post => post?.slug !== params.postSlug);
-
-        // Shuffle and pick, for example, 3 random posts
-        const shuffledPosts = randomPosts.sort(() => 0.5 - Math.random());
-        const selectedPosts = shuffledPosts.slice(0, 3);
-
-        return {
-            data,
-            content,
-            selectedPosts
-        }
+        const post = await getPost(params.postSlug);
+        return post;
     } catch {
         throw new Response("Not Found", { status: 404 });
     }
